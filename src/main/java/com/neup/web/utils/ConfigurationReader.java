@@ -1,19 +1,27 @@
 package com.neup.web.utils;
 
-import java.io.FileInputStream;
+import lombok.Getter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
-import static com.neup.web.utils.ConstantesUrls.URL_ENV_PROPERTIES;
-
 public class ConfigurationReader {
+
+    @Getter
     private static final Properties properties = new Properties();
 
     static {
-        try (FileInputStream fileInputStream = new FileInputStream(URL_ENV_PROPERTIES)) {
-            properties.load(fileInputStream);
+        try (InputStream inputStream = ConfigurationReader.class
+                .getClassLoader()
+                .getResourceAsStream("env.properties")) {
+
+            if (inputStream == null) {
+                throw new RuntimeException("No se encontró env.properties en src/main/resources/");
+            }
+            properties.load(inputStream);
+
         } catch (IOException e) {
-            throw new RuntimeException("No se pudo cargar el archivo de configuración: " + URL_ENV_PROPERTIES, e);
+            throw new RuntimeException("No se pudo cargar el archivo de configuración", e);
         }
     }
 
@@ -23,9 +31,5 @@ public class ConfigurationReader {
 
     public static String getProperty(String key, String defaultValue) {
         return properties.getProperty(key, defaultValue);
-    }
-
-    public static Properties getProperties() {
-        return properties;
     }
 }

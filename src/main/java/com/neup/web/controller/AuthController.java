@@ -19,7 +19,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    // ── POST /api/auth/login ─────────────────────────────────
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
@@ -27,7 +26,6 @@ public class AuthController {
         return ResponseEntity.status(status).body(response);
     }
 
-    // ── POST /api/auth/registro ──────────────────────────────
     @PostMapping("/registro")
     public ResponseEntity<AuthResponse> registro(@RequestBody RegisterRequest request) {
         AuthResponse response = authService.registro(request);
@@ -35,7 +33,6 @@ public class AuthController {
         return ResponseEntity.status(status).body(response);
     }
 
-    // ── PUT /api/auth/cambiar-password ───────────────────────
     @PutMapping("/cambiar-password")
     public ResponseEntity<AuthResponse> cambiarPassword(@RequestBody Map<String, String> body) {
         String usuarioId     = body.get("usuarioId");
@@ -52,7 +49,6 @@ public class AuthController {
         return ResponseEntity.status(status).body(response);
     }
 
-    // ── DELETE /api/auth/eliminar/{usuarioId} ────────────────
     @DeleteMapping("/eliminar/{usuarioId}")
     public ResponseEntity<AuthResponse> eliminarCuenta(@PathVariable String usuarioId) {
         AuthResponse response = authService.eliminarCuenta(usuarioId);
@@ -60,7 +56,6 @@ public class AuthController {
         return ResponseEntity.status(status).body(response);
     }
 
-    // ── GET /api/auth/health ─────────────────────────────────
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         return ResponseEntity.ok(Map.of("status", "UP", "servicio", "auth"));
