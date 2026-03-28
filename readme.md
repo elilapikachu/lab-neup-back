@@ -9,3 +9,6 @@ debes tener graddle y java. En este proyecto utilizamos estas herramientas.
 * Graddle Gradle 9.0.0 (Recuerda refrescar el graddle cuando descargues el proyecto)
 
 ---
+
+Para iniciarlizar la ejecución del back ejecuta el comando.
+./gradlew bootRun

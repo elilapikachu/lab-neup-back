@@ -18,18 +18,17 @@ repositories {
 
 dependencies {
     implementation(platform("org.springframework.boot:spring-boot-dependencies:3.5.0"))
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.mongodb:mongodb-driver-sync:4.11.1")
-
-    implementation("org.springframework.security:spring-security-crypto")
+    implementation("org.springframework.security:spring-security-crypto:6.5.0")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
+    implementation("org.slf4j:slf4j-api:2.0.9")
 
-    implementation("org.slf4j:slf4j-api")
-
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-    testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+    testCompileOnly("org.projectlombok:lombok:1.18.32")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
