@@ -4,15 +4,13 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.neup.web.utils.ConfigurationReader;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.neup.web.utils.ConstantesEntorno.NAME_DB;
 import static com.neup.web.utils.ConstantesEntorno.URL_DB;
 
+@Slf4j
 public class ConnectionFactory {
-    private static final Logger logger = LoggerFactory.getLogger(ConnectionFactory.class);
     private static MongoClient mongoClient;
     private static MongoDatabase mongoDatabase;
 
@@ -24,13 +22,12 @@ public class ConnectionFactory {
         if (mongoClient == null) {
             try {
                 String mongoUri = ConfigurationReader.getProperty(URL_DB);
-
-                logger.info("Conectando a MongoDB: {}", mongoUri);
+                log.info("Conectando a MongoDB: {}", mongoUri);
                 mongoClient = MongoClients.create(mongoUri);
-                logger.info("Conexión a MongoDB establecida exitosamente");
+                log.info("Conexión a MongoDB establecida exitosamente");
 
             } catch (Exception e) {
-                logger.error("Error al conectar a MongoDB", e);
+                log.error("Error al conectar a MongoDB", e);
                 throw new RuntimeException("No se pudo conectar a MongoDB", e);
             }
         }
@@ -43,10 +40,10 @@ public class ConnectionFactory {
                 String databaseName = ConfigurationReader.getProperty(NAME_DB);
 
                 mongoDatabase = getMongoClient().getDatabase(databaseName);
-                logger.info("Base de datos seleccionada: {}", databaseName);
+                log.info("Base de datos seleccionada: {}", databaseName);
 
             } catch (Exception e) {
-                logger.error("Error al obtener la base de datos", e);
+                log.error("Error al obtener la base de datos", e);
                 throw new RuntimeException("No se pudo obtener la base de datos", e);
             }
         }
@@ -59,9 +56,9 @@ public class ConnectionFactory {
                 mongoClient.close();
                 mongoClient = null;
                 mongoDatabase = null;
-                logger.info("Conexión a MongoDB cerrada");
+                log.info("Conexión a MongoDB cerrada");
             } catch (Exception e) {
-                logger.error("Error al cerrar la conexión a MongoDB", e);
+                log.error("Error al cerrar la conexión a MongoDB", e);
             }
         }
     }
@@ -71,7 +68,7 @@ public class ConnectionFactory {
             getMongoClient().getDatabase("admin").runCommand(new org.bson.Document("ping", 1));
             return true;
         } catch (Exception e) {
-            logger.warn("La conexión a MongoDB no está disponible", e);
+            log.warn("La conexión a MongoDB no está disponible", e);
             return false;
         }
     }
