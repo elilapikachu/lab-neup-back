@@ -14,6 +14,7 @@ import java.util.Optional;
 @Repository
 public class PersonaRepository {
 
+
     private static final String COLECCION = "persona";
 
     private MongoCollection<Document> getColeccion() {
@@ -22,17 +23,16 @@ public class PersonaRepository {
     }
 
     public Optional<Document> findByUsuarioId(String usuarioId) {
-        Document filtro = new Document("usuario_id", new ObjectId(usuarioId));
+        Document filtro = new Document("usuario_id", new org.bson.types.ObjectId(usuarioId));
         Document resultado = getColeccion().find(filtro).first();
         return Optional.ofNullable(resultado);
     }
 
     public Optional<Document> findById(String id) {
-        Document filtro = new Document("_id", new ObjectId(id));
+        Document filtro = new Document("_id", new org.bson.types.ObjectId(id));
         Document resultado = getColeccion().find(filtro).first();
         return Optional.ofNullable(resultado);
     }
-
     public ObjectId insertar(Persona persona) {
         Document contactos = new Document()
                 .append("telefono", persona.getContactos() != null ? persona.getContactos().getTelefono() : null)
