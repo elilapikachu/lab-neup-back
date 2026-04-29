@@ -6,16 +6,16 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class DBRepository {
-    private static final Logger logger = LoggerFactory.getLogger(DBRepository.class);
     private final MongoCollection<Document> collection;
     @Getter
     private final String collectionName;
@@ -23,15 +23,15 @@ public class DBRepository {
     public DBRepository(MongoDatabase database, String collectionName) {
         this.collectionName = collectionName;
         this.collection = database.getCollection(collectionName);
-        logger.info("Repositorio inicializado para la colección: {}", collectionName);
+        log.info("Repositorio inicializado para la colección: {}", collectionName);
     }
 
     public void insert(Map<String, Object> document) {
         try {
             collection.insertOne(new Document(document));
-            logger.debug("Documento insertado en {}", collectionName);
+            log.debug("Documento insertado en {}", collectionName);
         } catch (Exception e) {
-            logger.error("Error al insertar documento en {}", collectionName, e);
+            log.error("Error al insertar documento en {}", collectionName, e);
             throw new RuntimeException("Error al insertar en " + collectionName, e);
         }
     }
@@ -43,9 +43,9 @@ public class DBRepository {
                 docList.add(new Document(doc));
             }
             collection.insertMany(docList);
-            logger.debug("{} documentos insertados en {}", docList.size(), collectionName);
+            log.debug("{} documentos insertados en {}", docList.size(), collectionName);
         } catch (Exception e) {
-            logger.error("Error al insertar múltiples documentos en {}", collectionName, e);
+            log.error("Error al insertar múltiples documentos en {}", collectionName, e);
             throw new RuntimeException("Error al insertar en " + collectionName, e);
         }
     }
@@ -55,7 +55,7 @@ public class DBRepository {
             Bson bsonFilter = createFilter(filter);
             return collection.find(bsonFilter).first();
         } catch (Exception e) {
-            logger.error("Error al buscar documento en {}", collectionName, e);
+            log.error("Error al buscar documento en {}", collectionName, e);
             throw new RuntimeException("Error al buscar en " + collectionName, e);
         }
     }
@@ -65,7 +65,7 @@ public class DBRepository {
             Bson bsonFilter = createFilter(filter);
             return collection.find(bsonFilter).into(new ArrayList<>());
         } catch (Exception e) {
-            logger.error("Error al buscar documentos en {}", collectionName, e);
+            log.error("Error al buscar documentos en {}", collectionName, e);
             throw new RuntimeException("Error al buscar en " + collectionName, e);
         }
     }
@@ -74,7 +74,7 @@ public class DBRepository {
         try {
             return collection.find().into(new ArrayList<>());
         } catch (Exception e) {
-            logger.error("Error al obtener todos los documentos de {}", collectionName, e);
+            log.error("Error al obtener todos los documentos de {}", collectionName, e);
             throw new RuntimeException("Error al obtener documentos de " + collectionName, e);
         }
     }
@@ -84,10 +84,10 @@ public class DBRepository {
             Bson bsonFilter = createFilter(filter);
             Document updateDoc = new Document("$set", new Document(updates));
             UpdateResult result = collection.updateOne(bsonFilter, updateDoc);
-            logger.debug("Documento actualizado en {} - Documentos modificados: {}", collectionName, result.getModifiedCount());
+            log.debug("Documento actualizado en {} - Documentos modificados: {}", collectionName, result.getModifiedCount());
             return result;
         } catch (Exception e) {
-            logger.error("Error al actualizar documento en {}", collectionName, e);
+            log.error("Error al actualizar documento en {}", collectionName, e);
             throw new RuntimeException("Error al actualizar en " + collectionName, e);
         }
     }
@@ -97,10 +97,10 @@ public class DBRepository {
             Bson bsonFilter = createFilter(filter);
             Document updateDoc = new Document("$set", new Document(updates));
             UpdateResult result = collection.updateMany(bsonFilter, updateDoc);
-            logger.debug("{} documentos actualizados en {}", result.getModifiedCount(), collectionName);
+            log.debug("{} documentos actualizados en {}", result.getModifiedCount(), collectionName);
             return result;
         } catch (Exception e) {
-            logger.error("Error al actualizar múltiples documentos en {}", collectionName, e);
+            log.error("Error al actualizar múltiples documentos en {}", collectionName, e);
             throw new RuntimeException("Error al actualizar en " + collectionName, e);
         }
     }
@@ -109,10 +109,10 @@ public class DBRepository {
         try {
             Bson bsonFilter = createFilter(filter);
             DeleteResult result = collection.deleteOne(bsonFilter);
-            logger.debug("Documento eliminado de {} - Documentos removidos: {}", collectionName, result.getDeletedCount());
+            log.debug("Documento eliminado de {} - Documentos removidos: {}", collectionName, result.getDeletedCount());
             return result;
         } catch (Exception e) {
-            logger.error("Error al eliminar documento de {}", collectionName, e);
+            log.error("Error al eliminar documento de {}", collectionName, e);
             throw new RuntimeException("Error al eliminar de " + collectionName, e);
         }
     }
@@ -121,10 +121,10 @@ public class DBRepository {
         try {
             Bson bsonFilter = createFilter(filter);
             DeleteResult result = collection.deleteMany(bsonFilter);
-            logger.debug("{} documentos eliminados de {}", result.getDeletedCount(), collectionName);
+            log.debug("{} documentos eliminados de {}", result.getDeletedCount(), collectionName);
             return result;
         } catch (Exception e) {
-            logger.error("Error al eliminar múltiples documentos de {}", collectionName, e);
+            log.error("Error al eliminar múltiples documentos de {}", collectionName, e);
             throw new RuntimeException("Error al eliminar de " + collectionName, e);
         }
     }
@@ -145,7 +145,7 @@ public class DBRepository {
             Bson bsonFilter = createFilter(filter);
             return collection.countDocuments(bsonFilter);
         } catch (Exception e) {
-            logger.error("Error al contar documentos en {}", collectionName, e);
+            log.error("Error al contar documentos en {}", collectionName, e);
             throw new RuntimeException("Error al contar en " + collectionName, e);
         }
     }

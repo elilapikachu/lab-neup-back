@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200") // Puerto default de Angular
+@CrossOrigin(origins = "http://localhost:4200") // Puerto default de Angular para poder ejecutar aplicativo
 public class AuthController {
 
     private final AuthService authService;

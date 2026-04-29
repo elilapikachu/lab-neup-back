@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.neup.web.utils.ConstantesNumericas.OCHO;
+
 @Service
 public class AuthService {
 
@@ -65,8 +67,8 @@ public class AuthService {
             return new AuthResponse(false, "Usuario, email y contraseña son obligatorios");
         }
 
-        if (request.getPassword().length() < 6) {
-            return new AuthResponse(false, "La contraseña debe tener al menos 6 caracteres");
+        if (request.getPassword().length() < OCHO) {
+            return new AuthResponse(false, "La contraseña debe tener al menos 8 caracteres");
         }
 
         if (usuarioRepository.existeUsuarioOEmail(request.getUsuario(), request.getEmail())) {
@@ -117,8 +119,8 @@ public class AuthService {
             return new AuthResponse(false, "La contraseña actual es incorrecta");
         }
 
-        if (nuevaPassword.length() < 6) {
-            return new AuthResponse(false, "La nueva contraseña debe tener al menos 6 caracteres");
+        if (nuevaPassword.length() < OCHO) {
+            return new AuthResponse(false, "La nueva contraseña debe tener al menos 8 caracteres");
         }
 
         String nuevaPasswordHasheada = passwordEncoder.encode(nuevaPassword);

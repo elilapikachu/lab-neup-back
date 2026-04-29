@@ -1,40 +1,50 @@
 package com.neup.web.model;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.bson.types.ObjectId;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import java.util.List;
 
-@Setter
-@Getter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Persona {
 
-    private ObjectId id;
+    private String id;
+    private ObjectId usuarioId;
     private List<String> nombres;
     private List<String> apellidos;
     private Contactos contactos;
     private CaracteristicasFisicas caracteristicasFisicas;
     private Preferencias preferencias;
-    private ObjectId usuarioId;
+    private ActividadFisica actividadFisica;
     private Dietas dietas;
     private Recetas recetas;
 
-    @Setter
-    @Getter
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Contactos {
         private Long telefono;
         private String otroEmail;
     }
 
-    @Setter
-    @Getter
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class CaracteristicasFisicas {
         private Double peso;
         private Double altura;
+        private Integer edad;  // ✅ Agregado
     }
 
-    @Setter
-    @Getter
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Preferencias {
         private List<String> gustos;
         private List<String> alergias;
@@ -42,17 +52,27 @@ public class Persona {
         private List<String> objetivos;
     }
 
-    @Setter
-    @Getter
-    public static class Dietas {
-        private List<ObjectId> guardadas;
-        private List<ObjectId> personalizadas;
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ActividadFisica {
+        private Integer frecuenciaSemanal;
+        private List<String> tipoActividad;
     }
 
-    @Setter
-    @Getter
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Dietas {
+        private List<String> guardadas;
+        private List<String> personalizadas;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Recetas {
-        private List<ObjectId> guardadas;
-        private List<ObjectId> personalizadas;
+        private List<String> guardadas;
+        private List<String> personalizadas;
     }
 }
