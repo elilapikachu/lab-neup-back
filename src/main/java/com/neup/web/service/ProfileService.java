@@ -1,112 +1,130 @@
 package com.neup.web.service;
 
-import com.neup.web.model.Persona;
-import com.neup.web.model.Usuario;
+import com.neup.web.dto.ProfileDTO;
+import com.neup.web.repository.PersonaRepository;
+import com.neup.web.repository.UsuarioRepository;
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
+@RequiredArgsConstructor
 public class ProfileService {
+
     private final PersonaRepository personaRepo;
     private final UsuarioRepository usuarioRepo;
 
-    // ────────────────────────────────────────────────────────────────────────
-    // GET  /api/persona/{usuarioId}
-    // ────────────────────────────────────────────────────────────────────────
-    public PerfilDTO obtenerPerfil(String usuarioId) {
-
-        Usuario usuario = usuarioRepo.findById(usuarioId)
+    public ProfileDTO obtenerPerfil(String usuarioId) {
+        // Verificar que el usuario existe
+        Document usuarioDoc = usuarioRepo.findById(usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Usuario no encontrado: " + usuarioId));
+                        HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        // El perfil puede no existir todavía → devolvemos uno vacío
-        Persona persona = personaRepo.findByUsuarioId(usuarioId)
-                .orElse(null);
+        // Si el perfil no existe, devolver perfil vacío (NO error)
+        Document personaDoc = personaRepo.findByUsuarioId(usuarioId).orElse(null);
 
-        return toDTO(usuario, persona);
+        return toDTO(usuarioDoc, personaDoc);
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // PUT  /api/persona/{usuarioId}
-    // ────────────────────────────────────────────────────────────────────────
-    public PerfilDTO guardarPerfil(String usuarioId, PerfilDTO dto) {
-
-        Usuario usuario = usuarioRepo.findById(usuarioId)
+    public ProfileDTO guardarPerfil(String usuarioId, ProfileDTO dto) {
+        Document usuarioDoc = usuarioRepo.findById(usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Usuario no encontrado: " + usuarioId));
+                        HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        // Busca doc existente o crea uno nuevo
-        Persona persona = personaRepo.findByUsuarioId(usuarioId)
-                .orElse(Persona.builder()
-                        .usuarioId(usuarioId)
-                        .recetas(new Persona.Recetas(new ArrayList<>(), new ArrayList<>()))
-                        .build());
+        Document personaExistente = personaRepo.findByUsuarioId(usuarioId).orElse(null);
 
-        // Mapea DTO → entidad
-        persona.setNombres(nullSafe(dto.getNombres()));
-        persona.setApellidos(nullSafe(dto.getApellidos()));
+        Document contactos = new Document()
+                .append("telefono", dto.getTelefono())
+                .append("otro_email", dto.getOtroEmail());
 
-        persona.setContactos(new Persona.Contactos(
-                dto.getTelefono(),
-                dto.getOtroEmail()
-        ));
+        Document caracteristicas = new Document()
+                .append("peso", dto.getPeso())
+                .append("altura", dto.getAltura())
+                .append("edad", dto.getEdad());
 
-        persona.setCaracteristicasFisicas(new Persona.CaracteristicasFisicas(
-                dto.getPeso(),
-                dto.getAltura()
-        ));
+        Document preferencias = new Document()
+                .append("gustos", nullSafe(dto.getGustos()))
+                .append("alergias", nullSafe(dto.getAlergias()))
+                .append("tipo_dieta", nullSafe(dto.getTipoDieta()))
+                .append("objetivos", nullSafe(dto.getObjetivos()));
 
-        persona.setPreferencias(new Persona.Preferencias(
-                nullSafe(dto.getGustos()),
-                nullSafe(dto.getAlergias()),
-                nullSafe(dto.getTipoDieta()),
-                nullSafe(dto.getObjetivos())
-        ));
+        Document actividadFisica = new Document()
+                .append("frecuencia_semanal", dto.getFrecuenciaSemanal())
+                .append("tipo_actividad", nullSafe(dto.getTipoActividad()));
 
-        persona.setActividadFisica(new Persona.ActividadFisica(
-                dto.getFrecuenciaSemanal(),
-                nullSafe(dto.getTipoActividad())
-        ));
+        Document updateDoc = new Document()
+                .append("nombres", nullSafe(dto.getNombres()))
+                .append("apellidos", nullSafe(dto.getApellidos()))
+                .append("contactos", contactos)
+                .append("caracteristicas_fisicas", caracteristicas)
+                .append("preferencias", preferencias)
+                .append("actividad_fisica", actividadFisica)
+                .append("comidas_al_dia", dto.getComidasAlDia());
 
-        Persona guardada = personaRepo.save(persona);
-        return toDTO(usuario, guardada);
+        if (personaExistente != null) {
+            // Actualizar
+            String personaId = personaExistente.getObjectId("_id").toHexString();
+            personaRepo.actualizar(personaId, updateDoc);
+        } else {
+            // Crear nuevo
+            updateDoc.append("usuario_id", new ObjectId(usuarioId));
+            personaRepo.insertar(new com.neup.web.model.Persona());
+        }
+
+        Document personaActualizada = personaRepo.findByUsuarioId(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Error al guardar el perfil"));
+
+        return toDTO(usuarioDoc, personaActualizada);
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Helpers
-    // ────────────────────────────────────────────────────────────────────────
-    private PerfilDTO toDTO(Usuario usuario, Persona persona) {
-        PerfilDTO dto = new PerfilDTO();
-        dto.setUsuarioId(usuario.getId());
-        dto.setUsername(usuario.getUsuario());
-        dto.setEmail(usuario.getEmail());
+    private ProfileDTO toDTO(Document usuarioDoc, Document personaDoc) {
+        ProfileDTO dto = new ProfileDTO();
 
-        if (persona != null) {
-            dto.setPersonaId(persona.getId());
-            dto.setNombres(persona.getNombres());
-            dto.setApellidos(persona.getApellidos());
+        dto.setUsuarioId(usuarioDoc.getObjectId("_id").toHexString());
+        dto.setUsername(usuarioDoc.getString("usuario"));
+        dto.setEmail(usuarioDoc.getString("email"));
 
-            if (persona.getContactos() != null) {
-                dto.setTelefono(persona.getContactos().getTelefono());
-                dto.setOtroEmail(persona.getContactos().getOtroEmail());
+        if (personaDoc != null) {
+            dto.setPersonaId(personaDoc.getObjectId("_id").toHexString());
+            dto.setNombres(personaDoc.getList("nombres", String.class));
+            dto.setApellidos(personaDoc.getList("apellidos", String.class));
+
+            Document contactos = (Document) personaDoc.get("contactos");
+            if (contactos != null) {
+                dto.setTelefono(contactos.getLong("telefono"));
+                dto.setOtroEmail(contactos.getString("otro_email"));
             }
 
-            if (persona.getCaracteristicasFisicas() != null) {
-                dto.setPeso(persona.getCaracteristicasFisicas().getPeso());
-                dto.setAltura(persona.getCaracteristicasFisicas().getAltura());
+            Document caracteristicas = (Document) personaDoc.get("caracteristicas_fisicas");
+            if (caracteristicas != null) {
+                dto.setPeso(caracteristicas.getDouble("peso"));
+                dto.setAltura(caracteristicas.getDouble("altura"));
+                dto.setEdad(caracteristicas.getInteger("edad"));
             }
 
-            if (persona.getPreferencias() != null) {
-                dto.setGustos(persona.getPreferencias().getGustos());
-                dto.setAlergias(persona.getPreferencias().getAlergias());
-                dto.setTipoDieta(persona.getPreferencias().getTipoDieta());
-                dto.setObjetivos(persona.getPreferencias().getObjetivos());
+            Document preferencias = (Document) personaDoc.get("preferencias");
+            if (preferencias != null) {
+                dto.setGustos(preferencias.getList("gustos", String.class));
+                dto.setAlergias(preferencias.getList("alergias", String.class));
+                dto.setTipoDieta(preferencias.getList("tipo_dieta", String.class));
+                dto.setObjetivos(preferencias.getList("objetivos", String.class));
             }
 
-            if (persona.getActividadFisica() != null) {
-                dto.setFrecuenciaSemanal(persona.getActividadFisica().getFrecuenciaSemanal());
-                dto.setTipoActividad(persona.getActividadFisica().getTipoActividad());
+            Document actividadFisica = (Document) personaDoc.get("actividad_fisica");
+            if (actividadFisica != null) {
+                dto.setFrecuenciaSemanal(actividadFisica.getInteger("frecuencia_semanal"));
+                dto.setTipoActividad(actividadFisica.getList("tipo_actividad", String.class));
             }
+
+            dto.setComidasAlDia(personaDoc.getInteger("comidas_al_dia"));
         }
 
         return dto;

@@ -36,9 +36,13 @@ public class UsuarioRepository {
 
     // Buscar por ID
     public Optional<Document> findById(String id) {
-        Document filtro = new Document("_id", new ObjectId(id));
-        Document resultado = getColeccion().find(filtro).first();
-        return Optional.ofNullable(resultado);
+        try {
+            Document filtro = new Document("_id", new ObjectId(id));
+            Document resultado = getColeccion().find(filtro).first();
+            return Optional.ofNullable(resultado);
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
     // Insertar nuevo usuario
@@ -63,14 +67,22 @@ public class UsuarioRepository {
 
     // Actualizar password
     public boolean actualizarPassword(String id, String nuevaPassword) {
-        Document filtro = new Document("_id", new ObjectId(id));
-        Document update = new Document("$set", new Document("password", nuevaPassword));
-        return getColeccion().updateOne(filtro, update).getModifiedCount() > 0;
+        try {
+            Document filtro = new Document("_id", new ObjectId(id));
+            Document update = new Document("$set", new Document("password", nuevaPassword));
+            return getColeccion().updateOne(filtro, update).getModifiedCount() > 0;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     // Eliminar usuario
     public boolean eliminar(String id) {
-        Document filtro = new Document("_id", new ObjectId(id));
-        return getColeccion().deleteOne(filtro).getDeletedCount() > 0;
+        try {
+            Document filtro = new Document("_id", new ObjectId(id));
+            return getColeccion().deleteOne(filtro).getDeletedCount() > 0;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }

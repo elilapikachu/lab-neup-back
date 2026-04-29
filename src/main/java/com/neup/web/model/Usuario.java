@@ -1,7 +1,13 @@
 package com.neup.web.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Usuario {
 
     private ObjectId id;
@@ -9,23 +15,15 @@ public class Usuario {
     private String email;
     private String password;
 
-    public Usuario() {}
-
+    // Constructor sin id (para inserciones)
     public Usuario(String usuario, String email, String password) {
         this.usuario = usuario;
         this.email = email;
         this.password = password;
     }
 
-    public ObjectId getId() { return id; }
-    public void setId(ObjectId id) { this.id = id; }
-
-    public String getUsuario() { return usuario; }
-    public void setUsuario(String usuario) { this.usuario = usuario; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    // Método auxiliar para obtener id como String
+    public String getIdAsString() {
+        return id != null ? id.toHexString() : null;
+    }
 }
