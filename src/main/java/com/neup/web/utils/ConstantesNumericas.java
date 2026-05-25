@@ -6,5 +6,5 @@ public class ConstantesNumericas {
     public final static int SEIS = 6;
     public final static int OCHO = 6;
     public final static int DOCE = 12;
-
+    public final static int SETENTA = 70;
 }
