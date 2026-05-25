@@ -16,13 +16,13 @@ public class RecoverPasswordService {
     private final TemplateEngine templateEngine;
 
     public void recuperarPassword(String nombreUsuario, String emailUser) {
-        String emailDestino;
+        String emailDestino = emailUser;
         String password;
         String userDestino = nombreUsuario;
 
         if (emailUser.isEmpty()) {
             Document usuarioDoc = usuarioRepository.findByUsuario(nombreUsuario)
-                    .orElseThrow(() -> new RuntimeException(STR."Usuario no encontrado: \{nombreUsuario}"));
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado " + nombreUsuario));
 
             emailDestino = usuarioDoc.getString("email");
             password = usuarioDoc.getString("password");
@@ -32,21 +32,13 @@ public class RecoverPasswordService {
             }
         } else {
             Document emailDoc = usuarioRepository.findByEmail(emailUser)
-                    .orElseThrow(() -> new RuntimeException(STR."Email no encontrado \{emailUser}"));
+                    .orElseThrow(() -> new RuntimeException("Email no encontrado "+ emailUser));
 
             userDestino = emailDoc.getString("usuario");
             password = emailDoc.getString("password");
-            emailDestino = emailUser;
         }
 
-        // Crear contexto para Thymeleaf con las variables
-        Context context = new Context();
-        context.setVariable("usuario", userDestino);
-        context.setVariable("contrasena", password);
-        context.setVariable("email", emailDestino);
-
-        // Procesar plantilla HTML
-        String cuerpoHtml = templateEngine.process("plantilla/email_recuperacion_contrasena", context);
+        String cuerpoHtml = generarPlantillaEmail(userDestino, password, emailDestino);
 
         // Crear y enviar email
         Email email = Email.builder()
@@ -56,5 +48,14 @@ public class RecoverPasswordService {
                 .build();
 
         emailService.sendEmail(email);
+    }
+
+    private String generarPlantillaEmail(String userDestino, String password, String emailDestino){
+        Context context = new Context();
+        context.setVariable("usuario", userDestino);
+        context.setVariable("contrasena", password);
+        context.setVariable("email", emailDestino);
+
+        return templateEngine.process("plantilla/email_recuperacion_contrasena", context);
     }
 }
