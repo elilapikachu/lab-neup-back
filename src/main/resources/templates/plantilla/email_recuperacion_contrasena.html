@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperación de Contraseña - NEUP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Raleway", sans-serif;
+            background-color: #f5f5f5;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0F3A33 0%, #174f45 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .header h1 {
+            font-family: "Playfair Display", serif;
+            font-size: 42px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #e0e0e0;
+            letter-spacing: 1px;
+        }
+
+        .alert-badge {
+            display: inline-block;
+            background-color: #F25E07;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 16px;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .greeting strong {
+            color: #F25E07;
+        }
+
+        .security-alert {
+            background-color: #fff3cd;
+            border-left: 4px solid #F25E07;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .security-alert p {
+            color: #856404;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .security-alert strong {
+            color: #0F3A33;
+        }
+
+        .credentials-section {
+            background: linear-gradient(135deg, rgba(242, 94, 7, 0.08) 0%, rgba(15, 58, 51, 0.08) 100%);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border: 2px solid rgba(202, 104, 48, 0.3);
+        }
+
+        .credentials-title {
+            font-family: "Playfair Display", serif;
+            color: #0F3A33;
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .credential-item {
+            background-color: #ffffff;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(202, 104, 48, 0.2);
+            display: flex;
+            align-items: center;
+        }
+
+        .credential-icon {
+            width: 45px;
+            height: 45px;
+            background-color: #F25E07;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 22px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .credential-content {
+            flex: 1;
+        }
+
+        .credential-label {
+            font-weight: 600;
+            color: #0F3A33;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .credential-value {
+            color: #1a1a1a;
+            font-size: 15px;
+            font-weight: 600;
+            word-break: break-all;
+            font-family: "Courier New", monospace;
+            background-color: #f2f2f254;
+            padding: 8px 10px;
+            border-radius: 3px;
+            border: 1px solid rgba(202, 104, 48, 0.1);
+        }
+
+        .instruction-box ol {
+            color: #666666;
+            font-size: 14px;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+
+        .instruction-box li {
+            margin-bottom: 10px;
+        }
+
+        .instruction-box strong {
+            color: #0F3A33;
+        }
+
+        .warning-section {
+            background-color: #fff3cd;
+            border-left: 4px solid #F25E07;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-title {
+            font-weight: 600;
+            color: #0F3A33;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .warning-section p {
+            color: #666666;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: rgba(202, 104, 48, 0.2);
+            margin: 30px 0;
+        }
+
+        .info-section p {
+            color: #666666;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-section a {
+            color: #F25E07;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .info-section a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            background-color: #0F3A33;
+            color: #e0e0e0;
+            padding: 30px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .footer a {
+            color: #F25E07;
+            text-decoration: none;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .credentials-section {
+                padding: 15px;
+            }
+
+            .credential-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .credential-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>NEUP</h1>
+        <p>Recuperación de Contraseña</p>
+        <div class="alert-badge">🔐 CREDENCIALES DE ACCESO</div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <div class="greeting">
+            ¡Hola <strong th:text="${usuario}">Usuario</strong>!
+            <br><br>
+            Hemos procesado tu solicitud de recuperación de contraseña. A continuación, encontrarás tus credenciales de acceso con un password temporal, por favor cambiar contraseña al ingresar al aplicativo.
+        </div>
+
+        <!-- Alerta de Seguridad -->
+        <div class="security-alert">
+            <p>
+                <strong>⚠️ Aviso de Seguridad:</strong> Este correo contiene información sensible.
+                No compartas tu contraseña con nadie. NEUP nunca te pedirá tu contraseña por correo electrónico o teléfono.
+            </p>
+        </div>
+
+        <!-- Sección de Credenciales -->
+        <div class="credentials-section">
+            <div class="credentials-title">Tus Credenciales de Acceso</div>
+
+            <div class="credential-item">
+                <div class="credential-icon">👤</div>
+                <div class="credential-content">
+                    <div class="credential-label">Usuario</div>
+                    <div class="credential-value" th:text="${usuario}">usuario_placeholder</div>
+                </div>
+            </div>
+
+            <div class="credential-item">
+                <div class="credential-icon">🔑</div>
+                <div class="credential-content">
+                    <div class="credential-label">Contraseña</div>
+                    <div class="credential-value" th:text="${contrasena}">contrasena_placeholder</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aviso de Seguridad -->
+        <div class="warning-section">
+            <div class="warning-title">🛡️ Recomendaciones de Seguridad</div>
+            <p>
+                ✓ Utiliza una contraseña <strong>fuerte y única</strong> (mínimo 8 caracteres con mayúsculas, minúsculas, números y caracteres especiales)
+            </p>
+            <p>
+                ✓ Nunca reutilices contraseñas de otras cuentas
+            </p>
+            <p>
+                ✓ Cambia tu contraseña con regularidad
+            </p>
+            <p>
+                ✓ No compartas tus credenciales con terceros
+            </p>
+        </div>
+
+        <div class="divider"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>NEUP</strong></p>
+        <p>Tu seguridad es nuestro compromiso</p>
+    </div>
+</div>
+</body>
+</html>

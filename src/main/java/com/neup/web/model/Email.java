@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Email {
     private String emailPara;
+    private String asunto;
     private String cuerpoEmail;
 }
