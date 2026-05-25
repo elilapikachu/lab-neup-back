@@ -4,18 +4,34 @@ import com.neup.web.dto.DocumentoDTO;
 import com.neup.web.service.DocumentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/documentos")
-@Tag(name = "Documentos", description = "Consulta y eliminación de documentos / imágenes")
+@Tag(name = "Documentos", description = "Subida, consulta y eliminación de documentos / imágenes")
 public class DocumentoController {
 
     private final DocumentoService documentoService;
 
     public DocumentoController(DocumentoService documentoService) {
         this.documentoService = documentoService;
+    }
+
+    // ── POST /api/documentos ──────────────────────────────────────────────────
+    @Operation(summary = "Subir un documento o imagen de forma independiente")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DocumentoDTO.DocumentoResponse> subir(
+            @RequestPart("archivo") MultipartFile archivo,
+            @RequestPart(value = "nombre", required = false) String nombre) throws IOException {
+
+        String nombreFinal = (nombre != null && !nombre.isBlank()) ? nombre : archivo.getOriginalFilename();
+        DocumentoDTO.DocumentoResponse response = documentoService.guardarImagen(archivo, nombreFinal);
+        return ResponseEntity.ok(response);
     }
 
     // ── GET /api/documentos/{id} ──────────────────────────────────────────────

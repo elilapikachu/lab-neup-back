@@ -21,7 +21,7 @@ public class DocumentoService {
      * Directorio base donde se almacenan las imágenes en disco.
      * Ajústalo según tu entorno (puede venir de application.properties).
      */
-    private static final String DIRECTORIO_BASE = "./uploads/imagenes";
+    private static final String DIRECTORIO_BASE = "uploads/imagenes";
 
     private final DocumentoRepository documentoRepository;
 
