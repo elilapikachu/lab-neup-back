@@ -56,9 +56,40 @@ public class AuthService {
         response.setNombreUsuario(doc.getString("usuario"));
         response.setEmail(doc.getString("email"));
 
+        // ← VERIFICAR SI LA CONTRASEÑA ES TEMPORAL
+        Boolean esPasswordTemporal = (Boolean) doc.get("passwordTemporal");
+        response.setPasswordTemporal(esPasswordTemporal != null && esPasswordTemporal);
+
         personaDoc.ifPresent(p -> response.setPersonaId(p.getObjectId("_id").toHexString()));
 
         return response;
+    }
+
+    public AuthResponse cambiarPassword(String usuarioId, String passwordActual, String nuevaPassword) {
+        Optional<Document> usuarioDoc = usuarioRepository.findById(usuarioId);
+
+        if (usuarioDoc.isEmpty()) {
+            return new AuthResponse(false, "Usuario no encontrado");
+        }
+
+        String passwordGuardada = usuarioDoc.get().getString("password");
+
+        if (!passwordEncoder.matches(passwordActual, passwordGuardada)) {
+            return new AuthResponse(false, "La contraseña actual es incorrecta");
+        }
+
+        if (nuevaPassword.length() < OCHO) {
+            return new AuthResponse(false, "La nueva contraseña debe tener al menos 8 caracteres");
+        }
+
+        String nuevaPasswordEncriptada = passwordEncoder.encode(nuevaPassword);
+
+        // ← ACTUALIZAR CONTRASEÑA Y DESMARCAR COMO TEMPORAL
+        boolean actualizado = usuarioRepository.actualizarPasswordTemporal(usuarioId, nuevaPasswordEncriptada, false);
+
+        return actualizado
+                ? new AuthResponse(true, "Contraseña actualizada correctamente")
+                : new AuthResponse(false, "No se pudo actualizar la contraseña");
     }
 
     public AuthResponse registro(RegisterRequest request) {
@@ -104,31 +135,6 @@ public class AuthService {
         response.setEmail(request.getEmail());
 
         return response;
-    }
-
-    public AuthResponse cambiarPassword(String usuarioId, String passwordActual, String nuevaPassword) {
-        Optional<Document> usuarioDoc = usuarioRepository.findById(usuarioId);
-
-        if (usuarioDoc.isEmpty()) {
-            return new AuthResponse(false, "Usuario no encontrado");
-        }
-
-        String passwordGuardada = usuarioDoc.get().getString("password");
-
-        if (!passwordEncoder.matches(passwordActual, passwordGuardada)) {
-            return new AuthResponse(false, "La contraseña actual es incorrecta");
-        }
-
-        if (nuevaPassword.length() < OCHO) {
-            return new AuthResponse(false, "La nueva contraseña debe tener al menos 8 caracteres");
-        }
-
-        String nuevaPasswordHasheada = passwordEncoder.encode(nuevaPassword);
-        boolean actualizado = usuarioRepository.actualizarPassword(usuarioId, nuevaPasswordHasheada);
-
-        return actualizado
-                ? new AuthResponse(true, "Contraseña actualizada correctamente")
-                : new AuthResponse(false, "No se pudo actualizar la contraseña");
     }
 
     public AuthResponse eliminarCuenta(String usuarioId) {

@@ -29,6 +29,7 @@ public class AuthDTO {
         private String personaId;
         private String nombreUsuario;
         private String email;
+        private boolean passwordTemporal;
 
         public AuthResponse(boolean success, String message) {
             this.success = success;
