@@ -30,9 +30,13 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.9")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+    implementation ("org.springframework.boot:spring-boot-starter-thymeleaf")
+
+
     compileOnly("org.projectlombok:lombok:1.18.32")
     annotationProcessor("org.projectlombok:lombok:1.18.32")
     testCompileOnly("org.projectlombok:lombok:1.18.32")
+
     testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))

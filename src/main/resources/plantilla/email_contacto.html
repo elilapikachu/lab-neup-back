@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Contacto - NEUP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Raleway", sans-serif;
+            background-color: #f5f5f5;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0F3A33 0%, #174f45 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .header h1 {
+            font-family: "Playfair Display", serif;
+            font-size: 42px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #e0e0e0;
+            letter-spacing: 1px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background-color: #F25E07;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 16px;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .greeting strong {
+            color: #F25E07;
+        }
+
+        .confirmation-box {
+            background-color: #f2f2f254;
+            padding: 20px;
+            border-left: 4px solid #F25E07;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .confirmation-box p {
+            color: #666666;
+            font-size: 14px;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .confirmation-box strong {
+            color: #0F3A33;
+        }
+
+        .section-title {
+            font-family: "Playfair Display", serif;
+            color: #0F3A33;
+            font-size: 18px;
+            margin: 25px 0 15px 0;
+            border-bottom: 2px solid rgba(202, 104, 48, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background-color: #f2f2f254;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #174f45;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #0F3A33;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #666666;
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .info-value a {
+            color: #F25E07;
+            text-decoration: none;
+        }
+
+        .info-value a:hover {
+            text-decoration: underline;
+        }
+
+        .message-box {
+            background-color: #f2f2f254;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            border-left: 3px solid #F25E07;
+        }
+
+        .message-label {
+            font-weight: 600;
+            color: #0F3A33;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .message-content {
+            color: #666666;
+            font-size: 14px;
+            line-height: 1.7;
+            background-color: #ffffff;
+            padding: 12px;
+            border-radius: 3px;
+            border: 1px solid rgba(202, 104, 48, 0.1);
+        }
+
+        .divider {
+            height: 1px;
+            background-color: rgba(202, 104, 48, 0.2);
+            margin: 30px 0;
+        }
+
+        .response-section {
+            background: linear-gradient(135deg, rgba(242, 94, 7, 0.05) 0%, rgba(15, 58, 51, 0.05) 100%);
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .response-section p {
+            color: #666666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .response-section strong {
+            color: #0F3A33;
+        }
+
+        .support-info p {
+            color: #666666;
+            font-size: 13px;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .support-info a {
+            color: #F25E07;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .support-info a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            background-color: #0F3A33;
+            color: #e0e0e0;
+            padding: 30px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .footer a {
+            color: #F25E07;
+            text-decoration: none;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+
+            .info-item {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>NEUP</h1>
+            <p>Hemos recibido tu mensaje</p>
+            <div class="status-badge">✓ MENSAJE RECIBIDO</div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                ¡Hola <strong>[NOMBRE]</strong>!
+                <br><br>
+                Gracias por contactarnos. Hemos recibido tu mensaje y nos complace informarte que está siendo procesado por nuestro equipo de soporte.
+            </div>
+
+            <!-- Confirmación -->
+            <div class="confirmation-box">
+                <p>
+                    Tu solicitud ha sido registrada con éxito. A continuación, se detalla la información que recibimos:
+                </p>
+            </div>
+
+            <!-- Detalles del Contacto -->
+            <div class="section-title">📋 Información del Contacto</div>
+
+            <div class="info-section">
+                <div class="info-item">
+                    <div class="info-label">Nombre Completo</div>
+                    <div class="info-value">[NOMBRE]</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Correo Electrónico</div>
+                    <div class="info-value"><a href="mailto:[EMAIL]">[EMAIL]</a></div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Teléfono</div>
+                    <div class="info-value"><a href="tel:[TELEFONO]">[TELEFONO]</a></div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Asunto</div>
+                    <div class="info-value">[ASUNTO]</div>
+                </div>
+
+            </div>
+
+            <!-- Mensaje -->
+            <div class="message-box">
+                <div class="message-label">Mensaje</div>
+                <div class="message-content">[MENSAJE]</div>
+            </div>
+
+            <!-- Información de respuesta -->
+            <div class="divider"></div>
+
+            <div class="response-section">
+                <p style="font-weight: 600; color: #0F3A33; margin-bottom: 12px;">⏱️ Tiempo de respuesta estimado</p>
+                <p>
+                    Nuestro equipo de soporte se pondrá en contacto contigo en un plazo de <strong>24 a 48 horas hábiles</strong>. 
+                    Nos esforzamos por brindarte la mejor atención posible.
+                </p>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Mensaje de cierre -->
+            <div style="text-align: center; color: #666666; font-size: 14px;">
+                <p>Valoramos tu confianza en NEUP y tu interés en nuestros servicios de comidas saludables.</p>
+                <p style="margin-top: 10px;">
+                    <strong style="color: #0F3A33;">¡Gracias por elegirnos!</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>NEUP</strong></p>
+            <p>Estamos aquí para apoyarte</p>
+        </div>
+    </div>
+</body>
+</html>

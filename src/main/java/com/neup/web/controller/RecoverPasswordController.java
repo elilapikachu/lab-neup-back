@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Autenticación", description = "Recuperación de contraseña")
+@Tag(name = "Email", description = "Recuperación de contraseña")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class RecoverPasswordController {
@@ -20,7 +20,7 @@ public class RecoverPasswordController {
     @PostMapping("/recuperar-password")
     public ResponseEntity<String> recuperarPassword(@RequestBody RecoverPasswordDTO dto) {
         try {
-            recuperarPasswordService.recuperarPassword(dto.getUsuario());
+            recuperarPasswordService.recuperarPassword(dto.getUsuario(), dto.getEmail());
             return ResponseEntity.ok("Correo de recuperación enviado correctamente");
 
         } catch (RuntimeException e) {
