@@ -6,5 +6,4 @@ public class ConstantesEntorno {
     public final static  String SPRING_MAIL_USERNAME = "spring.mail.username";
     public final static  String SPRING_MAIL_PASSWORD = "spring.mail.password";
     public static final boolean IS_RENDER = System.getenv("RENDER") != null;
-
 }

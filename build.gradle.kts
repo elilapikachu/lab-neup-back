@@ -30,8 +30,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.9")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
-    implementation ("org.springframework.boot:spring-boot-starter-thymeleaf")
-
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
     compileOnly("org.projectlombok:lombok:1.18.32")
     annotationProcessor("org.projectlombok:lombok:1.18.32")
