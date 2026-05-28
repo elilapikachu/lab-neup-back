@@ -3,6 +3,7 @@ package com.neup.web.controller;
 import com.neup.web.dto.RecoverPasswordDTO;
 import com.neup.web.service.RecoverPasswordService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class RecoverPasswordController {
     private final RecoverPasswordService recuperarPasswordService;
 
     @PostMapping("/recuperar-password")
-    public ResponseEntity<String> recuperarPassword(@RequestBody RecoverPasswordDTO dto) {
+    public ResponseEntity<String> recuperarPassword(@Valid @RequestBody RecoverPasswordDTO dto) {
         try {
             recuperarPasswordService.recuperarPassword(dto.getUsuario(), dto.getEmail());
             return ResponseEntity.ok("Correo de recuperación enviado correctamente");

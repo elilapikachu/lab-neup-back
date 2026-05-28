@@ -81,7 +81,7 @@ public class DocumentoService {
         return documentoRepository.findById(id).map(doc -> DocumentoDTO.DocumentoResponse.builder()
                 .id(doc.getObjectId("_id").toHexString())
                 .nombre(doc.getString("nombre"))
-                .tamanno(doc.getLong("tamanno") != null ? doc.getLong("tamanno") : 0L)
+                .tamanno(doc.get("tamanno") instanceof Number n ? n.longValue() : 0L)
                 .ruta(doc.getString("ruta"))
                 .extension(doc.getString("extension"))
                 .build());

@@ -24,6 +24,7 @@ configurations.all {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.security:spring-security-crypto:6.5.0")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")

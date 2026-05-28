@@ -18,12 +18,14 @@ public class Dieta {
     private boolean esPersonalizada;
     private String visibilidad; // "publica" | "privada"
     private ObjectId portada;
+    private String creadaPor;   // personaId del creador
 
     @Data
     @Builder
     public static class PlanSemanal {
         private ObjectId recetaId;
         private String tipoComida; // desayuno | almuerzo | cena | merienda
+        private String dia;        // lunes | martes | miercoles | jueves | viernes | sabado | domingo
     }
 }
 

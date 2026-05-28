@@ -1,11 +1,13 @@
 package com.neup.web.service;
 
 import com.neup.web.dto.DietaDTO;
+import com.neup.web.dto.RecetaDTO;
 import com.neup.web.model.Dieta;
 import com.neup.web.repository.DietaRepository;
 import com.neup.web.utils.repository.ConstantesDietaRepository;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,10 +21,13 @@ public class DietaService {
 
     private final DietaRepository dietaRepository;
     private final DocumentoService documentoService;
+    private final RecetaService recetaService;
 
-    public DietaService(DietaRepository dietaRepository, DocumentoService documentoService) {
+    public DietaService(DietaRepository dietaRepository, DocumentoService documentoService,
+                        @Lazy RecetaService recetaService) {
         this.dietaRepository  = dietaRepository;
         this.documentoService = documentoService;
+        this.recetaService    = recetaService;
     }
 
     // ── Crear ─────────────────────────────────────────────────────────────────
@@ -53,6 +58,11 @@ public class DietaService {
                 .stream().map(this::mapearResponse).toList();
     }
 
+    public List<DietaDTO.DietaResponse> obtenerPorPersona(String personaId) {
+        return dietaRepository.findByPersonaId(personaId)
+                .stream().map(this::mapearResponse).toList();
+    }
+
     // ── Actualizar ────────────────────────────────────────────────────────────
 
     public boolean actualizar(String id, DietaDTO.DietaRequest request) {
@@ -67,7 +77,8 @@ public class DietaService {
             List<Document> planDoc = request.getPlanSemanal().stream()
                     .map(p -> new Document()
                             .append(ConstantesDietaRepository.CAMPO_RECETA_ID,   new ObjectId(p.getRecetaId()))
-                            .append(ConstantesDietaRepository.CAMPO_TIPO_COMIDA, p.getTipoComida()))
+                            .append(ConstantesDietaRepository.CAMPO_TIPO_COMIDA, p.getTipoComida())
+                            .append(ConstantesDietaRepository.CAMPO_DIA,         p.getDia()))
                     .toList();
             campos.append(ConstantesDietaRepository.CAMPO_PLAN_SEMANAL, planDoc);
         }
@@ -79,7 +90,7 @@ public class DietaService {
     // ── Plan semanal ──────────────────────────────────────────────────────────
 
     public boolean agregarRecetaAlPlan(String dietaId, DietaDTO.AgregarRecetaPlanRequest request) {
-        return dietaRepository.agregarRecetaPlan(dietaId, new ObjectId(request.getRecetaId()), request.getTipoComida());
+        return dietaRepository.agregarRecetaPlan(dietaId, new ObjectId(request.getRecetaId()), request.getTipoComida(), request.getDia());
     }
 
     public boolean eliminarRecetaDelPlan(String dietaId, String recetaId) {
@@ -103,6 +114,19 @@ public class DietaService {
         return dietaRepository.eliminar(id);
     }
 
+    // ── Helpers de lectura robusta ────────────────────────────────────────────
+
+    /**
+     * Lee un campo que puede estar almacenado como ObjectId o String
+     * y lo devuelve siempre como hex String (o null).
+     */
+    private static String getIdAsString(Document doc, String key) {
+        Object val = doc.get(key);
+        if (val == null) return null;
+        if (val instanceof ObjectId oid) return oid.toHexString();
+        return val.toString();
+    }
+
     // ── Mappers ───────────────────────────────────────────────────────────────
 
     private Dieta mapearRequest(DietaDTO.DietaRequest request) {
@@ -112,6 +136,7 @@ public class DietaService {
                 plan.add(Dieta.PlanSemanal.builder()
                         .recetaId(new ObjectId(p.getRecetaId()))
                         .tipoComida(p.getTipoComida())
+                        .dia(p.getDia())
                         .build());
             }
         }
@@ -123,6 +148,7 @@ public class DietaService {
                 .planSemanal(plan)
                 .esPersonalizada(request.isEsPersonalizada())
                 .visibilidad(request.getVisibilidad())
+                .creadaPor(request.getCreadaPor())
                 .build();
     }
 
@@ -132,25 +158,29 @@ public class DietaService {
         List<Document> planDocs = (List<Document>) doc.get(ConstantesDietaRepository.CAMPO_PLAN_SEMANAL);
         if (planDocs != null) {
             for (Document p : planDocs) {
-                ObjectId recetaId = p.getObjectId(ConstantesDietaRepository.CAMPO_RECETA_ID);
+                String recetaId = getIdAsString(p, ConstantesDietaRepository.CAMPO_RECETA_ID);
+                RecetaDTO.RecetaResponse receta = recetaId != null
+                        ? recetaService.obtenerPorId(recetaId).orElse(null)
+                        : null;
                 plan.add(DietaDTO.PlanSemanalResponse.builder()
-                        .recetaId(recetaId != null ? recetaId.toHexString() : null)
+                        .recetaId(recetaId)
+                        .receta(receta)
                         .tipoComida(p.getString(ConstantesDietaRepository.CAMPO_TIPO_COMIDA))
+                        .dia(p.getString(ConstantesDietaRepository.CAMPO_DIA))
                         .build());
             }
         }
 
-        ObjectId portada = doc.getObjectId(ConstantesDietaRepository.CAMPO_PORTADA);
-
         return DietaDTO.DietaResponse.builder()
-                .id(doc.getObjectId(ConstantesDietaRepository.CAMPO_ID).toHexString())
+                .id(getIdAsString(doc, ConstantesDietaRepository.CAMPO_ID))
                 .nombreDieta(doc.getString(ConstantesDietaRepository.CAMPO_NOMBRE_DIETA))
                 .descripcion(doc.getString(ConstantesDietaRepository.CAMPO_DESCRIPCION))
                 .metas((List<String>) doc.get(ConstantesDietaRepository.CAMPO_METAS))
                 .planSemanal(plan)
                 .esPersonalizada(Boolean.TRUE.equals(doc.getBoolean(ConstantesDietaRepository.CAMPO_ES_PERSONALIZADA)))
                 .visibilidad(doc.getString(ConstantesDietaRepository.CAMPO_VISIBILIDAD))
-                .portada(portada != null ? portada.toHexString() : null)
+                .portada(getIdAsString(doc, ConstantesDietaRepository.CAMPO_PORTADA))
+                .creadaPor(getIdAsString(doc, ConstantesDietaRepository.CAMPO_CREADA_POR))
                 .build();
     }
 }

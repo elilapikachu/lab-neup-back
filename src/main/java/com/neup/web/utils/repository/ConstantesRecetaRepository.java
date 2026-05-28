@@ -19,9 +19,11 @@ public class ConstantesRecetaRepository {
     public static final String CAMPO_IMAGEN                 = "imagen";
 
     // Ingrediente
+    public static final String CAMPO_INGREDIENTE_ID         = "ingrediente_id";
     public static final String CAMPO_NOMBRE_INGREDIENTE     = "nombre_ingrediente";
     public static final String CAMPO_CANTIDAD               = "cantidad";
     public static final String CAMPO_TIPO_INGREDIENTE       = "tipo_ingrediente";
+    public static final String CAMPO_TIPO_CANTIDAD          = "tipo_cantidad";
 
     // Nutricion
     public static final String CAMPO_KCAL                   = "kcal";

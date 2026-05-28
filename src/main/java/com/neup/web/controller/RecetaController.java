@@ -4,6 +4,7 @@ import com.neup.web.dto.RecetaDTO;
 import com.neup.web.service.RecetaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class RecetaController {
     // ── POST /api/recetas ────────────────────────────────────────────────────
     @Operation(summary = "Crear receta")
     @PostMapping
-    public ResponseEntity<RecetaDTO.RecetaIdResponse> crear(@RequestBody RecetaDTO.RecetaRequest request) {
+    public ResponseEntity<RecetaDTO.RecetaIdResponse> crear(@Valid @RequestBody RecetaDTO.RecetaRequest request) {
         return ResponseEntity.ok(recetaService.crear(request));
     }
 
@@ -64,7 +65,7 @@ public class RecetaController {
     @Operation(summary = "Actualizar receta")
     @PutMapping("/{id}")
     public ResponseEntity<Void> actualizar(@PathVariable String id,
-                                           @RequestBody RecetaDTO.RecetaRequest request) {
+                                           @Valid @RequestBody RecetaDTO.RecetaRequest request) {
         boolean actualizado = recetaService.actualizar(id, request);
         return actualizado ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }

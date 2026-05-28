@@ -4,12 +4,18 @@ import com.neup.web.dto.DocumentoDTO;
 import com.neup.web.service.DocumentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/documentos")
@@ -41,6 +47,42 @@ public class DocumentoController {
         return documentoService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ── GET /api/documentos/{id}/archivo ──────────────────────────────────────
+    @Operation(summary = "Servir el archivo binario de un documento por id")
+    @GetMapping("/{id}/archivo")
+    public ResponseEntity<Resource> servirArchivo(@PathVariable String id) {
+        var docOpt = documentoService.obtenerPorId(id);
+        if (docOpt.isEmpty()) return ResponseEntity.<Resource>notFound().build();
+
+        var doc = docOpt.get();
+        try {
+            Path rutaArchivo = Paths.get(doc.getRuta());
+            Resource resource = new UrlResource(rutaArchivo.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.<Resource>notFound().build();
+            }
+            String contentType = determinarContentType(doc.getExtension());
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + doc.getNombre() + "\"")
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(resource);
+        } catch (MalformedURLException e) {
+            return ResponseEntity.<Resource>notFound().build();
+        }
+    }
+
+    private String determinarContentType(String extension) {
+        if (extension == null) return MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        return switch (extension.toLowerCase()) {
+            case "jpg", "jpeg" -> MediaType.IMAGE_JPEG_VALUE;
+            case "png"         -> MediaType.IMAGE_PNG_VALUE;
+            case "gif"         -> MediaType.IMAGE_GIF_VALUE;
+            case "webp"        -> "image/webp";
+            case "pdf"         -> MediaType.APPLICATION_PDF_VALUE;
+            default            -> MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        };
     }
 
     // ── DELETE /api/documentos/{id} ───────────────────────────────────────────

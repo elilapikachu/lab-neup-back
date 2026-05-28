@@ -4,6 +4,7 @@ import com.neup.web.dto.DietaDTO;
 import com.neup.web.service.DietaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class DietaController {
     // ── POST /api/dietas ──────────────────────────────────────────────────────
     @Operation(summary = "Crear dieta")
     @PostMapping
-    public ResponseEntity<DietaDTO.DietaIdResponse> crear(@RequestBody DietaDTO.DietaRequest request) {
+    public ResponseEntity<DietaDTO.DietaIdResponse> crear(@Valid @RequestBody DietaDTO.DietaRequest request) {
         return ResponseEntity.ok(dietaService.crear(request));
     }
 
@@ -44,6 +45,13 @@ public class DietaController {
         return ResponseEntity.ok(dietaService.obtenerPublicas());
     }
 
+    // ── GET /api/dietas/persona/{personaId} ───────────────────────────────────
+    @Operation(summary = "Obtener dietas creadas por una persona")
+    @GetMapping("/persona/{personaId}")
+    public ResponseEntity<List<DietaDTO.DietaResponse>> obtenerPorPersona(@PathVariable String personaId) {
+        return ResponseEntity.ok(dietaService.obtenerPorPersona(personaId));
+    }
+
     // ── GET /api/dietas/{id} ──────────────────────────────────────────────────
     @Operation(summary = "Obtener dieta por id")
     @GetMapping("/{id}")
@@ -57,7 +65,7 @@ public class DietaController {
     @Operation(summary = "Actualizar dieta")
     @PutMapping("/{id}")
     public ResponseEntity<Void> actualizar(@PathVariable String id,
-                                           @RequestBody DietaDTO.DietaRequest request) {
+                                           @Valid @RequestBody DietaDTO.DietaRequest request) {
         boolean actualizado = dietaService.actualizar(id, request);
         return actualizado ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
@@ -67,7 +75,7 @@ public class DietaController {
     @PostMapping("/{id}/plan")
     public ResponseEntity<Void> agregarRecetaAlPlan(
             @PathVariable String id,
-            @RequestBody DietaDTO.AgregarRecetaPlanRequest request) {
+            @Valid @RequestBody DietaDTO.AgregarRecetaPlanRequest request) {
         boolean ok = dietaService.agregarRecetaAlPlan(id, request);
         return ok ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
