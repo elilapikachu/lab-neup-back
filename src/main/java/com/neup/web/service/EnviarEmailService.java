@@ -54,13 +54,20 @@ public class EnviarEmailService {
                     .replace("[MENSAJE]", dto.getMensaje())
                     .replace("[TELEFONO]", "N/A");
 
-            Email email = Email.builder()
+            // Confirmación al usuario que escribió
+            sendEmail(Email.builder()
                     .emailPara(dto.getEmail())
                     .asunto("NEUP - Hemos recibido tu mensaje")
                     .cuerpoEmail(html)
-                    .build();
+                    .build());
 
-            sendEmail(email);
+            // Notificación interna al administrador
+            String adminEmail = ConfigurationReader.getProperty(SPRING_MAIL_USERNAME);
+            sendEmail(Email.builder()
+                    .emailPara(adminEmail)
+                    .asunto("NEUP - Nueva consulta de: " + dto.getNombre() + " | " + dto.getAsunto())
+                    .cuerpoEmail(html)
+                    .build());
 
         } catch (IOException e) {
             throw new RuntimeException("Error al cargar la plantilla de contacto", e);

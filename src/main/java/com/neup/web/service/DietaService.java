@@ -1,11 +1,13 @@
 package com.neup.web.service;
 
 import com.neup.web.dto.DietaDTO;
+import com.neup.web.dto.RecetaDTO;
 import com.neup.web.model.Dieta;
 import com.neup.web.repository.DietaRepository;
 import com.neup.web.utils.repository.ConstantesDietaRepository;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,10 +21,13 @@ public class DietaService {
 
     private final DietaRepository dietaRepository;
     private final DocumentoService documentoService;
+    private final RecetaService recetaService;
 
-    public DietaService(DietaRepository dietaRepository, DocumentoService documentoService) {
+    public DietaService(DietaRepository dietaRepository, DocumentoService documentoService,
+                        @Lazy RecetaService recetaService) {
         this.dietaRepository  = dietaRepository;
         this.documentoService = documentoService;
+        this.recetaService    = recetaService;
     }
 
     // ── Crear ─────────────────────────────────────────────────────────────────
@@ -153,8 +158,13 @@ public class DietaService {
         List<Document> planDocs = (List<Document>) doc.get(ConstantesDietaRepository.CAMPO_PLAN_SEMANAL);
         if (planDocs != null) {
             for (Document p : planDocs) {
+                String recetaId = getIdAsString(p, ConstantesDietaRepository.CAMPO_RECETA_ID);
+                RecetaDTO.RecetaResponse receta = recetaId != null
+                        ? recetaService.obtenerPorId(recetaId).orElse(null)
+                        : null;
                 plan.add(DietaDTO.PlanSemanalResponse.builder()
-                        .recetaId(getIdAsString(p, ConstantesDietaRepository.CAMPO_RECETA_ID))
+                        .recetaId(recetaId)
+                        .receta(receta)
                         .tipoComida(p.getString(ConstantesDietaRepository.CAMPO_TIPO_COMIDA))
                         .dia(p.getString(ConstantesDietaRepository.CAMPO_DIA))
                         .build());

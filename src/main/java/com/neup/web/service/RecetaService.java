@@ -168,6 +168,14 @@ public class RecetaService {
         return ((Number) val).doubleValue();
     }
 
+    /** Lee un campo como String tolerando ObjectId y otros tipos. */
+    private static String getAsString(Document doc, String key) {
+        Object val = doc.get(key);
+        if (val == null) return null;
+        if (val instanceof ObjectId oid) return oid.toHexString();
+        return val.toString();
+    }
+
     @SuppressWarnings("unchecked")
     private RecetaDTO.RecetaResponse mapearResponse(Document doc) {
         // Ingredientes
@@ -176,11 +184,11 @@ public class RecetaService {
         if (ingDocs != null) {
             for (Document ing : ingDocs) {
                 ingredientes.add(RecetaDTO.IngredienteResponse.builder()
-                        .ingredienteId(ing.getString(ConstantesRecetaRepository.CAMPO_INGREDIENTE_ID))
-                        .nombreIngrediente(ing.getString(ConstantesRecetaRepository.CAMPO_NOMBRE_INGREDIENTE))
+                        .ingredienteId(getAsString(ing, ConstantesRecetaRepository.CAMPO_INGREDIENTE_ID))
+                        .nombreIngrediente(getAsString(ing, ConstantesRecetaRepository.CAMPO_NOMBRE_INGREDIENTE))
                         .cantidad(getAsDouble(ing, ConstantesRecetaRepository.CAMPO_CANTIDAD))
-                        .tipoIngrediente(ing.getString(ConstantesRecetaRepository.CAMPO_TIPO_INGREDIENTE))
-                        .tipoCantidad(ing.getString(ConstantesRecetaRepository.CAMPO_TIPO_CANTIDAD))
+                        .tipoIngrediente(getAsString(ing, ConstantesRecetaRepository.CAMPO_TIPO_INGREDIENTE))
+                        .tipoCantidad(getAsString(ing, ConstantesRecetaRepository.CAMPO_TIPO_CANTIDAD))
                         .build());
             }
         }
@@ -211,15 +219,15 @@ public class RecetaService {
         ObjectId creadaPor = doc.getObjectId(ConstantesRecetaRepository.CAMPO_CREADA_POR);
 
         return RecetaDTO.RecetaResponse.builder()
-                .id(doc.getObjectId(ConstantesRecetaRepository.CAMPO_ID).toHexString())
-                .nombreReceta(doc.getString(ConstantesRecetaRepository.CAMPO_NOMBRE_RECETA))
+                .id(getAsString(doc, ConstantesRecetaRepository.CAMPO_ID))
+                .nombreReceta(getAsString(doc, ConstantesRecetaRepository.CAMPO_NOMBRE_RECETA))
                 .ingredientes(ingredientes)
                 .nutricion(nutricion)
                 .tags((List<String>) doc.get(ConstantesRecetaRepository.CAMPO_TAGS))
-                .tiempoPreparacion(doc.getString(ConstantesRecetaRepository.CAMPO_TIEMPO_PREPARACION))
+                .tiempoPreparacion(getAsString(doc, ConstantesRecetaRepository.CAMPO_TIEMPO_PREPARACION))
                 .creadaPor(creadaPor != null ? creadaPor.toHexString() : null)
                 .esPersonalizada(Boolean.TRUE.equals(doc.getBoolean(ConstantesRecetaRepository.CAMPO_ES_PERSONALIZADA)))
-                .visibilidad(doc.getString(ConstantesRecetaRepository.CAMPO_VISIBILIDAD))
+                .visibilidad(getAsString(doc, ConstantesRecetaRepository.CAMPO_VISIBILIDAD))
                 .imagen(imagenes)
                 .build();
     }

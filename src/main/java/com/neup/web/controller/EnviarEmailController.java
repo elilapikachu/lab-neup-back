@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Tag(name = "Email", description = "Enviar emails")
 @RequestMapping("/api/email")
-@CrossOrigin(origins = "*")
 public class EnviarEmailController {
     private final EnviarEmailService emailService;
 
@@ -45,7 +44,7 @@ public class EnviarEmailController {
         try {
             emailService.sendContactEmail(dto);
             return ResponseEntity.ok("Mensaje de contacto enviado correctamente");
-        } catch (MailException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al enviar: " + e.getMessage());
         }
