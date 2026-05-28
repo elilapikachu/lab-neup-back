@@ -24,9 +24,11 @@ public class Receta {
     @Data
     @Builder
     public static class Ingrediente {
+        private String ingredienteId;
         private String nombreIngrediente;
         private double cantidad;
         private String tipoIngrediente;
+        private String tipoCantidad;
     }
 
     @Data

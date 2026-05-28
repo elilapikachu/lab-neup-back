@@ -2,8 +2,10 @@ package com.neup.web.controller;
 
 import com.neup.web.dto.AuthDTO.*;
 import com.neup.web.service.AuthService;
+import com.neup.web.service.EmailVerificacionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +19,16 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailVerificacionService emailVerificacionService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, EmailVerificacionService emailVerificacionService) {
         this.authService = authService;
+        this.emailVerificacionService = emailVerificacionService;
     }
 
     @Operation(summary = "Logguearse en el aplicativo")
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         HttpStatus status = response.isSuccess() ? HttpStatus.OK : HttpStatus.UNAUTHORIZED;
         return ResponseEntity.status(status).body(response);
@@ -32,7 +36,7 @@ public class AuthController {
 
     @Operation(summary = "Crear usuario")
     @PostMapping("/registro")
-    public ResponseEntity<AuthResponse> registro(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> registro(@Valid @RequestBody RegisterRequest request) {
         AuthResponse response = authService.registro(request);
         HttpStatus status = response.isSuccess() ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST;
         return ResponseEntity.status(status).body(response);
@@ -61,6 +65,13 @@ public class AuthController {
         AuthResponse response = authService.eliminarCuenta(usuarioId);
         HttpStatus status = response.isSuccess() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
         return ResponseEntity.status(status).body(response);
+    }
+
+    @Operation(summary = "Verificar si el dominio del email acepta correos (registros MX)")
+    @GetMapping("/verificar-email")
+    public ResponseEntity<Map<String, Boolean>> verificarEmail(@RequestParam String email) {
+        boolean valido = emailVerificacionService.dominioAceptaCorreos(email);
+        return ResponseEntity.ok(Map.of("valido", valido));
     }
 
     @Operation(summary = "Validar api activa")

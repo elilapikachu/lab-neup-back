@@ -83,9 +83,11 @@ public class RecetaService {
         if (request.getIngredientes() != null) {
             List<Document> ingredientesDoc = request.getIngredientes().stream()
                     .map(ing -> new Document()
+                            .append(ConstantesRecetaRepository.CAMPO_INGREDIENTE_ID,     ing.getIngredienteId())
                             .append(ConstantesRecetaRepository.CAMPO_NOMBRE_INGREDIENTE, ing.getNombreIngrediente())
                             .append(ConstantesRecetaRepository.CAMPO_CANTIDAD,           ing.getCantidad())
-                            .append(ConstantesRecetaRepository.CAMPO_TIPO_INGREDIENTE,   ing.getTipoIngrediente()))
+                            .append(ConstantesRecetaRepository.CAMPO_TIPO_INGREDIENTE,   ing.getTipoIngrediente())
+                            .append(ConstantesRecetaRepository.CAMPO_TIPO_CANTIDAD,      ing.getTipoCantidad()))
                     .toList();
             campos.append(ConstantesRecetaRepository.CAMPO_INGREDIENTES, ingredientesDoc);
         }
@@ -126,9 +128,11 @@ public class RecetaService {
         if (request.getIngredientes() != null) {
             for (var ing : request.getIngredientes()) {
                 ingredientes.add(Receta.Ingrediente.builder()
+                        .ingredienteId(ing.getIngredienteId())
                         .nombreIngrediente(ing.getNombreIngrediente())
                         .cantidad(ing.getCantidad())
                         .tipoIngrediente(ing.getTipoIngrediente())
+                        .tipoCantidad(ing.getTipoCantidad())
                         .build());
             }
         }
@@ -157,6 +161,13 @@ public class RecetaService {
                 .build();
     }
 
+    /** Lee un campo numérico de un Document tolerando Int32, Int64 y Double. */
+    private static double getAsDouble(Document doc, String key) {
+        Object val = doc.get(key);
+        if (val == null) return 0.0;
+        return ((Number) val).doubleValue();
+    }
+
     @SuppressWarnings("unchecked")
     private RecetaDTO.RecetaResponse mapearResponse(Document doc) {
         // Ingredientes
@@ -165,10 +176,11 @@ public class RecetaService {
         if (ingDocs != null) {
             for (Document ing : ingDocs) {
                 ingredientes.add(RecetaDTO.IngredienteResponse.builder()
+                        .ingredienteId(ing.getString(ConstantesRecetaRepository.CAMPO_INGREDIENTE_ID))
                         .nombreIngrediente(ing.getString(ConstantesRecetaRepository.CAMPO_NOMBRE_INGREDIENTE))
-                        .cantidad(ing.getDouble(ConstantesRecetaRepository.CAMPO_CANTIDAD) != null
-                                ? ing.getDouble(ConstantesRecetaRepository.CAMPO_CANTIDAD) : 0)
+                        .cantidad(getAsDouble(ing, ConstantesRecetaRepository.CAMPO_CANTIDAD))
                         .tipoIngrediente(ing.getString(ConstantesRecetaRepository.CAMPO_TIPO_INGREDIENTE))
+                        .tipoCantidad(ing.getString(ConstantesRecetaRepository.CAMPO_TIPO_CANTIDAD))
                         .build());
             }
         }
@@ -178,10 +190,10 @@ public class RecetaService {
         Document nutDoc = (Document) doc.get(ConstantesRecetaRepository.CAMPO_NUTRICION);
         if (nutDoc != null) {
             nutricion = RecetaDTO.NutricionResponse.builder()
-                    .kcal(nutDoc.getDouble(ConstantesRecetaRepository.CAMPO_KCAL) != null ? nutDoc.getDouble(ConstantesRecetaRepository.CAMPO_KCAL) : 0)
-                    .proteinas(nutDoc.getDouble(ConstantesRecetaRepository.CAMPO_PROTEINAS) != null ? nutDoc.getDouble(ConstantesRecetaRepository.CAMPO_PROTEINAS) : 0)
-                    .carbohidratos(nutDoc.getDouble(ConstantesRecetaRepository.CAMPO_CARBOHIDRATOS) != null ? nutDoc.getDouble(ConstantesRecetaRepository.CAMPO_CARBOHIDRATOS) : 0)
-                    .fibra(nutDoc.getDouble(ConstantesRecetaRepository.CAMPO_FIBRA) != null ? nutDoc.getDouble(ConstantesRecetaRepository.CAMPO_FIBRA) : 0)
+                    .kcal(getAsDouble(nutDoc, ConstantesRecetaRepository.CAMPO_KCAL))
+                    .proteinas(getAsDouble(nutDoc, ConstantesRecetaRepository.CAMPO_PROTEINAS))
+                    .carbohidratos(getAsDouble(nutDoc, ConstantesRecetaRepository.CAMPO_CARBOHIDRATOS))
+                    .fibra(getAsDouble(nutDoc, ConstantesRecetaRepository.CAMPO_FIBRA))
                     .vitaminas((List<String>) nutDoc.get(ConstantesRecetaRepository.CAMPO_VITAMINAS))
                     .minerales((List<String>) nutDoc.get(ConstantesRecetaRepository.CAMPO_MINERALES))
                     .build();

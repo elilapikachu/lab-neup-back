@@ -4,6 +4,7 @@ import com.neup.web.dto.ProfileDTO;
 import com.neup.web.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class ProfileController {
         @PutMapping("/{usuarioId}")
         public ResponseEntity<ProfileDTO> guardarPerfil(
                 @PathVariable String usuarioId,
-                @RequestBody ProfileDTO dto) {
+                @Valid @RequestBody ProfileDTO dto) {
             return ResponseEntity.ok(perfilService.guardarPerfil(usuarioId, dto));
         }
 }

@@ -35,13 +35,19 @@ public class DietaRepository {
         return getColeccion().find(filtro).into(new ArrayList<>());
     }
 
+    public List<Document> findByPersonaId(String personaId) {
+        Document filtro = new Document(ConstantesDietaRepository.CAMPO_CREADA_POR, personaId);
+        return getColeccion().find(filtro).into(new ArrayList<>());
+    }
+
     public ObjectId insertar(Dieta dieta) {
         List<Document> planDoc = new ArrayList<>();
         if (dieta.getPlanSemanal() != null) {
             for (Dieta.PlanSemanal plan : dieta.getPlanSemanal()) {
                 planDoc.add(new Document()
                         .append(ConstantesDietaRepository.CAMPO_RECETA_ID,   plan.getRecetaId())
-                        .append(ConstantesDietaRepository.CAMPO_TIPO_COMIDA, plan.getTipoComida()));
+                        .append(ConstantesDietaRepository.CAMPO_TIPO_COMIDA, plan.getTipoComida())
+                        .append(ConstantesDietaRepository.CAMPO_DIA,         plan.getDia()));
             }
         }
 
@@ -52,7 +58,8 @@ public class DietaRepository {
                 .append(ConstantesDietaRepository.CAMPO_PLAN_SEMANAL,      planDoc)
                 .append(ConstantesDietaRepository.CAMPO_ES_PERSONALIZADA,  dieta.isEsPersonalizada())
                 .append(ConstantesDietaRepository.CAMPO_VISIBILIDAD,       dieta.getVisibilidad())
-                .append(ConstantesDietaRepository.CAMPO_PORTADA,           null);
+                .append(ConstantesDietaRepository.CAMPO_PORTADA,           null)
+                .append(ConstantesDietaRepository.CAMPO_CREADA_POR,        dieta.getCreadaPor());
 
         getColeccion().insertOne(doc);
         return doc.getObjectId(ConstantesDietaRepository.CAMPO_ID);
@@ -70,11 +77,12 @@ public class DietaRepository {
         return getColeccion().updateOne(filtro, update).getModifiedCount() > 0;
     }
 
-    public boolean agregarRecetaPlan(String dietaId, ObjectId recetaId, String tipoComida) {
+    public boolean agregarRecetaPlan(String dietaId, ObjectId recetaId, String tipoComida, String dia) {
         Document filtro = new Document(ConstantesDietaRepository.CAMPO_ID, new ObjectId(dietaId));
         Document entrada = new Document()
                 .append(ConstantesDietaRepository.CAMPO_RECETA_ID,   recetaId)
-                .append(ConstantesDietaRepository.CAMPO_TIPO_COMIDA, tipoComida);
+                .append(ConstantesDietaRepository.CAMPO_TIPO_COMIDA, tipoComida)
+                .append(ConstantesDietaRepository.CAMPO_DIA,         dia);
         Document update = new Document("$push", new Document(ConstantesDietaRepository.CAMPO_PLAN_SEMANAL, entrada));
         return getColeccion().updateOne(filtro, update).getModifiedCount() > 0;
     }

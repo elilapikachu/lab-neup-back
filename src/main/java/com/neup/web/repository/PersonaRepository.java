@@ -80,4 +80,52 @@ public class PersonaRepository {
         Document filtro = new Document("_id", new ObjectId(id));
         return getColeccion().deleteOne(filtro).getDeletedCount() > 0;
     }
+
+    // ── Guardadas: recetas ────────────────────────────────────────────────────
+
+    public void addRecetaGuardada(String personaId, String recetaId) {
+        Document filtro = new Document("_id", new ObjectId(personaId));
+        Document update = new Document("$addToSet", new Document("recetas.guardadas", recetaId));
+        getColeccion().updateOne(filtro, update);
+    }
+
+    public void removeRecetaGuardada(String personaId, String recetaId) {
+        Document filtro = new Document("_id", new ObjectId(personaId));
+        Document update = new Document("$pull", new Document("recetas.guardadas", recetaId));
+        getColeccion().updateOne(filtro, update);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getRecetasGuardadas(String personaId) {
+        Document doc = getColeccion().find(new Document("_id", new ObjectId(personaId))).first();
+        if (doc == null) return List.of();
+        Document recetas = (Document) doc.get("recetas");
+        if (recetas == null) return List.of();
+        List<String> guardadas = (List<String>) recetas.get("guardadas");
+        return guardadas != null ? guardadas : List.of();
+    }
+
+    // ── Guardadas: dietas ─────────────────────────────────────────────────────
+
+    public void addDietaGuardada(String personaId, String dietaId) {
+        Document filtro = new Document("_id", new ObjectId(personaId));
+        Document update = new Document("$addToSet", new Document("dietas.guardadas", dietaId));
+        getColeccion().updateOne(filtro, update);
+    }
+
+    public void removeDietaGuardada(String personaId, String dietaId) {
+        Document filtro = new Document("_id", new ObjectId(personaId));
+        Document update = new Document("$pull", new Document("dietas.guardadas", dietaId));
+        getColeccion().updateOne(filtro, update);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getDietasGuardadas(String personaId) {
+        Document doc = getColeccion().find(new Document("_id", new ObjectId(personaId))).first();
+        if (doc == null) return List.of();
+        Document dietas = (Document) doc.get("dietas");
+        if (dietas == null) return List.of();
+        List<String> guardadas = (List<String>) dietas.get("guardadas");
+        return guardadas != null ? guardadas : List.of();
+    }
 }

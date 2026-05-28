@@ -53,9 +53,11 @@ public class RecetaRepository {
         if (receta.getIngredientes() != null) {
             for (Receta.Ingrediente ing : receta.getIngredientes()) {
                 ingredientesDoc.add(new Document()
+                        .append(ConstantesRecetaRepository.CAMPO_INGREDIENTE_ID,     ing.getIngredienteId())
                         .append(ConstantesRecetaRepository.CAMPO_NOMBRE_INGREDIENTE, ing.getNombreIngrediente())
                         .append(ConstantesRecetaRepository.CAMPO_CANTIDAD,           ing.getCantidad())
-                        .append(ConstantesRecetaRepository.CAMPO_TIPO_INGREDIENTE,   ing.getTipoIngrediente()));
+                        .append(ConstantesRecetaRepository.CAMPO_TIPO_INGREDIENTE,   ing.getTipoIngrediente())
+                        .append(ConstantesRecetaRepository.CAMPO_TIPO_CANTIDAD,      ing.getTipoCantidad()));
             }
         }
 

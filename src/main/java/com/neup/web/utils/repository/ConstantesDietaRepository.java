@@ -15,10 +15,12 @@ public class ConstantesDietaRepository {
     public static final String CAMPO_ES_PERSONALIZADA   = "es_personalizada";
     public static final String CAMPO_VISIBILIDAD        = "visibilidad";
     public static final String CAMPO_PORTADA            = "portada";
+    public static final String CAMPO_CREADA_POR         = "creada_por";
 
     // Plan semanal
     public static final String CAMPO_RECETA_ID          = "receta_id";
     public static final String CAMPO_TIPO_COMIDA        = "tipo_comida";
+    public static final String CAMPO_DIA                = "dia";
 
     // Visibilidad
     public static final String VISIBILIDAD_PUBLICA      = "publica";
