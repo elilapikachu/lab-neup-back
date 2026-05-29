@@ -52,6 +52,13 @@ public class DietaController {
         return ResponseEntity.ok(dietaService.obtenerPorPersona(personaId));
     }
 
+    // ── GET /api/dietas/recomendadas/{personaId} ──────────────────────────────
+    @Operation(summary = "Obtener dietas recomendadas según preferencias del usuario")
+    @GetMapping("/recomendadas/{personaId}")
+    public ResponseEntity<DietaDTO.RecomendadasResponse> obtenerRecomendadas(@PathVariable String personaId) {
+        return ResponseEntity.ok(dietaService.obtenerRecomendadas(personaId));
+    }
+
     // ── GET /api/dietas/{id} ──────────────────────────────────────────────────
     @Operation(summary = "Obtener dieta por id")
     @GetMapping("/{id}")

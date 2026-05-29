@@ -132,4 +132,13 @@ public class RecetaDTO {
         private String id;
         private String mensaje;
     }
+
+    // ── Response recomendadas ─────────────────────────────────────────────────
+    @Data
+    @Builder
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class RecomendadasResponse {
+        private boolean tienePreferencias;
+        private List<RecetaResponse> recetas;
+    }
 }

@@ -4,6 +4,7 @@ import com.neup.web.dto.DietaDTO;
 import com.neup.web.dto.RecetaDTO;
 import com.neup.web.model.Dieta;
 import com.neup.web.repository.DietaRepository;
+import com.neup.web.repository.PersonaRepository;
 import com.neup.web.utils.repository.ConstantesDietaRepository;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,12 +24,14 @@ public class DietaService {
     private final DietaRepository dietaRepository;
     private final DocumentoService documentoService;
     private final RecetaService recetaService;
+    private final PersonaRepository personaRepository;
 
     public DietaService(DietaRepository dietaRepository, DocumentoService documentoService,
-                        @Lazy RecetaService recetaService) {
+                        @Lazy RecetaService recetaService, PersonaRepository personaRepository) {
         this.dietaRepository  = dietaRepository;
         this.documentoService = documentoService;
         this.recetaService    = recetaService;
+        this.personaRepository = personaRepository;
     }
 
     // ── Crear ─────────────────────────────────────────────────────────────────
@@ -106,6 +110,86 @@ public class DietaService {
                 .id(docResponse.getId())
                 .mensaje("Portada actualizada correctamente")
                 .build();
+    }
+
+    // ── Recomendadas ──────────────────────────────────────────────────────────
+
+    @SuppressWarnings("unchecked")
+    public DietaDTO.RecomendadasResponse obtenerRecomendadas(String personaId) {
+        Document personaDoc = personaRepository.findById(personaId).orElse(null);
+
+        List<String> tipoDieta = List.of();
+        List<String> objetivos = List.of();
+
+        if (personaDoc != null) {
+            Document prefs = (Document) personaDoc.get("preferencias");
+            if (prefs != null) {
+                tipoDieta = safeStringList(prefs, "tipo_dieta");
+                objetivos = safeStringList(prefs, "objetivos");
+            }
+        }
+
+        boolean tienePreferencias = !tipoDieta.isEmpty() || !objetivos.isEmpty();
+
+        if (!tienePreferencias) {
+            return DietaDTO.RecomendadasResponse.builder()
+                    .tienePreferencias(false)
+                    .dietas(List.of())
+                    .build();
+        }
+
+        final List<String> td = tipoDieta;
+        final List<String> ob = objetivos;
+
+        record Scored(int score, DietaDTO.DietaResponse dieta) {}
+
+        List<DietaDTO.DietaResponse> recomendadas = dietaRepository
+                .findByVisibilidad(ConstantesDietaRepository.VISIBILIDAD_PUBLICA)
+                .stream()
+                .map(doc -> new Scored(puntajeDieta(doc, td, ob), mapearResponse(doc)))
+                .sorted(Comparator.comparingInt(Scored::score).reversed())
+                .map(Scored::dieta)
+                .limit(6)
+                .toList();
+
+        return DietaDTO.RecomendadasResponse.builder()
+                .tienePreferencias(true)
+                .dietas(recomendadas)
+                .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private int puntajeDieta(Document doc, List<String> tipoDieta, List<String> objetivos) {
+        int score = 0;
+
+        List<String> metas = (List<String>) doc.get(ConstantesDietaRepository.CAMPO_METAS);
+        if (metas != null) {
+            for (String meta : metas) {
+                String metaLower = meta.toLowerCase();
+                for (String obj : objetivos) {
+                    if (metaLower.contains(obj.toLowerCase()) || obj.toLowerCase().contains(metaLower)) {
+                        score += 3;
+                    }
+                }
+            }
+        }
+
+        String nombreDieta  = doc.getString(ConstantesDietaRepository.CAMPO_NOMBRE_DIETA);
+        String descripcion  = doc.getString(ConstantesDietaRepository.CAMPO_DESCRIPCION);
+        String textoLower   = ((nombreDieta != null ? nombreDieta : "") + " " +
+                               (descripcion  != null ? descripcion  : "")).toLowerCase();
+
+        for (String tipo : tipoDieta) {
+            if (textoLower.contains(tipo.toLowerCase())) score += 2;
+        }
+
+        return score;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<String> safeStringList(Document doc, String key) {
+        List<String> list = (List<String>) doc.get(key);
+        return list != null ? list : List.of();
     }
 
     // ── Eliminar ──────────────────────────────────────────────────────────────
