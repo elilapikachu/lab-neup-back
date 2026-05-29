@@ -3,10 +3,12 @@ package com.neup.web.service;
 import com.neup.web.dto.ContactoDTO;
 import com.neup.web.model.Email;
 import com.neup.web.utils.ConfigurationReader;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,24 +19,29 @@ import static com.neup.web.utils.ConstantesEntorno.SPRING_MAIL_USERNAME;
 
 @Service
 public class EnviarEmailService {
-    private final JavaMailSender mailSender;
+    private final SendGrid sendGrid;
 
-    public EnviarEmailService(final JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public EnviarEmailService(final SendGrid sendGrid) {
+        this.sendGrid = sendGrid;
     }
 
-    public void sendEmail(Email email) {
+    public void sendEmail(Email emailModel) {
+        String fromAddress = ConfigurationReader.getProperty(SPRING_MAIL_USERNAME);
+        com.sendgrid.helpers.mail.objects.Email from = new com.sendgrid.helpers.mail.objects.Email(fromAddress);
+        com.sendgrid.helpers.mail.objects.Email to = new com.sendgrid.helpers.mail.objects.Email(emailModel.getEmailPara());
+        Content content = new Content("text/html", emailModel.getCuerpoEmail());
+        Mail mail = new Mail(from, emailModel.getAsunto(), to, content);
+
+        Request request = new Request();
         try {
-            MimeMessage mensaje = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
-
-            helper.setTo(email.getEmailPara());
-            helper.setSubject(email.getAsunto());
-            helper.setText(email.getCuerpoEmail(), true);
-            helper.setFrom(ConfigurationReader.getProperty(SPRING_MAIL_USERNAME));
-
-            mailSender.send(mensaje);
-        } catch (MessagingException e) {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sendGrid.api(request);
+            if (response.getStatusCode() >= 400) {
+                throw new RuntimeException("Error al enviar correo: " + response.getStatusCode() + " " + response.getBody());
+            }
+        } catch (IOException e) {
             throw new RuntimeException("Error al enviar correo electrónico", e);
         }
     }
@@ -54,14 +61,12 @@ public class EnviarEmailService {
                     .replace("[MENSAJE]", dto.getMensaje())
                     .replace("[TELEFONO]", "N/A");
 
-            // Confirmación al usuario que escribió
             sendEmail(Email.builder()
                     .emailPara(dto.getEmail())
                     .asunto("NEUP - Hemos recibido tu mensaje")
                     .cuerpoEmail(html)
                     .build());
 
-            // Notificación interna al administrador
             String adminEmail = ConfigurationReader.getProperty(SPRING_MAIL_USERNAME);
             sendEmail(Email.builder()
                     .emailPara(adminEmail)
@@ -74,4 +79,3 @@ public class EnviarEmailService {
         }
     }
 }
-
