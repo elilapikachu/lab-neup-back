@@ -2,6 +2,7 @@ package com.neup.web.service;
 
 import com.neup.web.dto.RecetaDTO;
 import com.neup.web.model.Receta;
+import com.neup.web.repository.PersonaRepository;
 import com.neup.web.repository.RecetaRepository;
 import com.neup.web.utils.repository.ConstantesRecetaRepository;
 import org.bson.Document;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,10 +21,13 @@ public class RecetaService {
 
     private final RecetaRepository recetaRepository;
     private final DocumentoService documentoService;
+    private final PersonaRepository personaRepository;
 
-    public RecetaService(RecetaRepository recetaRepository, DocumentoService documentoService) {
-        this.recetaRepository = recetaRepository;
-        this.documentoService = documentoService;
+    public RecetaService(RecetaRepository recetaRepository, DocumentoService documentoService,
+                         PersonaRepository personaRepository) {
+        this.recetaRepository  = recetaRepository;
+        this.documentoService  = documentoService;
+        this.personaRepository = personaRepository;
     }
 
     // ── Crear ─────────────────────────────────────────────────────────────────
@@ -113,6 +118,100 @@ public class RecetaService {
         boolean eliminadoReceta = recetaRepository.eliminarImagen(recetaId, oid);
         if (eliminadoReceta) documentoService.eliminar(imagenId);
         return eliminadoReceta;
+    }
+
+    // ── Recomendadas ──────────────────────────────────────────────────────────
+
+    @SuppressWarnings("unchecked")
+    public RecetaDTO.RecomendadasResponse obtenerRecomendadas(String personaId) {
+        Document personaDoc = personaRepository.findById(personaId).orElse(null);
+
+        List<String> gustos    = List.of();
+        List<String> alergias  = List.of();
+        List<String> objetivos = List.of();
+
+        if (personaDoc != null) {
+            Document prefs = (Document) personaDoc.get("preferencias");
+            if (prefs != null) {
+                gustos    = safeStringList(prefs, "gustos");
+                alergias  = safeStringList(prefs, "alergias");
+                objetivos = safeStringList(prefs, "objetivos");
+            }
+        }
+
+        boolean tienePreferencias = !gustos.isEmpty() || !alergias.isEmpty() || !objetivos.isEmpty();
+
+        if (!tienePreferencias) {
+            return RecetaDTO.RecomendadasResponse.builder()
+                    .tienePreferencias(false)
+                    .recetas(List.of())
+                    .build();
+        }
+
+        final List<String> g = gustos;
+        final List<String> a = alergias;
+        final List<String> o = objetivos;
+
+        record Scored(int score, RecetaDTO.RecetaResponse receta) {}
+
+        List<RecetaDTO.RecetaResponse> recomendadas = recetaRepository
+                .findByVisibilidad(ConstantesRecetaRepository.VISIBILIDAD_PUBLICA)
+                .stream()
+                .map(doc -> new Scored(puntajeReceta(doc, g, a, o), mapearResponse(doc)))
+                .filter(s -> s.score() > Integer.MIN_VALUE)
+                .sorted(Comparator.comparingInt(Scored::score).reversed())
+                .map(Scored::receta)
+                .limit(6)
+                .toList();
+
+        return RecetaDTO.RecomendadasResponse.builder()
+                .tienePreferencias(true)
+                .recetas(recomendadas)
+                .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private int puntajeReceta(Document doc, List<String> gustos, List<String> alergias, List<String> objetivos) {
+        int score = 0;
+
+        List<Document> ingDocs = (List<Document>) doc.get(ConstantesRecetaRepository.CAMPO_INGREDIENTES);
+        if (ingDocs != null) {
+            for (Document ing : ingDocs) {
+                String nombre = ing.getString(ConstantesRecetaRepository.CAMPO_NOMBRE_INGREDIENTE);
+                if (nombre == null) continue;
+                String nombreLower = nombre.toLowerCase();
+
+                for (String alergia : alergias) {
+                    if (nombreLower.contains(alergia.toLowerCase())) return Integer.MIN_VALUE;
+                }
+                for (String gusto : gustos) {
+                    if (nombreLower.contains(gusto.toLowerCase())) score += 2;
+                }
+            }
+        }
+
+        Document nutDoc = (Document) doc.get(ConstantesRecetaRepository.CAMPO_NUTRICION);
+        if (nutDoc != null) {
+            double kcal      = getAsDouble(nutDoc, ConstantesRecetaRepository.CAMPO_KCAL);
+            double proteinas = getAsDouble(nutDoc, ConstantesRecetaRepository.CAMPO_PROTEINAS);
+            for (String obj : objetivos) {
+                switch (obj.toLowerCase()) {
+                    case "muscular"          -> { if (proteinas >= 20) score += 2; }
+                    case "bajar"             -> { if (kcal > 0 && kcal <= 400) score += 2; }
+                    case "subir", "energia", "energía" -> { if (kcal >= 500) score += 1; }
+                    case "salud"             -> score += 1;
+                    default                  -> {}
+                }
+            }
+        }
+
+        return score;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<String> safeStringList(Document doc, String key) {
+        List<String> list = (List<String>) doc.get(key);
+        return list != null ? list : List.of();
     }
 
     // ── Eliminar ──────────────────────────────────────────────────────────────

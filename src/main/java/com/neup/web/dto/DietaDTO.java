@@ -112,4 +112,13 @@ public class DietaDTO {
         private String id;
         private String mensaje;
     }
+
+    // ── Response recomendadas ─────────────────────────────────────────────────
+    @Data
+    @Builder
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class RecomendadasResponse {
+        private boolean tienePreferencias;
+        private List<DietaResponse> dietas;
+    }
 }

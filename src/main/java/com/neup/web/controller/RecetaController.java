@@ -61,6 +61,13 @@ public class RecetaController {
         return ResponseEntity.ok(recetaService.obtenerPorPersona(personaId));
     }
 
+    // ── GET /api/recetas/recomendadas/{personaId} ─────────────────────────────
+    @Operation(summary = "Obtener recetas recomendadas según preferencias del usuario")
+    @GetMapping("/recomendadas/{personaId}")
+    public ResponseEntity<RecetaDTO.RecomendadasResponse> obtenerRecomendadas(@PathVariable String personaId) {
+        return ResponseEntity.ok(recetaService.obtenerRecomendadas(personaId));
+    }
+
     // ── PUT /api/recetas/{id} ─────────────────────────────────────────────────
     @Operation(summary = "Actualizar receta")
     @PutMapping("/{id}")
