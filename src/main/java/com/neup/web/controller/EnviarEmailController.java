@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,7 +32,7 @@ public class EnviarEmailController {
             emailService.sendEmail(email);
             return ResponseEntity.ok("Correo enviado a " + email.getEmailPara());
 
-        } catch (MailException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al enviar: " + e.getMessage());
         }

@@ -29,7 +29,7 @@ dependencies {
     implementation("org.springframework.security:spring-security-crypto:6.5.0")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
     implementation("org.slf4j:slf4j-api:2.0.9")
-    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("com.sendgrid:sendgrid-java:4.10.2")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
