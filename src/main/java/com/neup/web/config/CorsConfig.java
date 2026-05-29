@@ -14,15 +14,16 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        List<String> origins = new ArrayList<>(List.of(
+        List<String> patterns = new ArrayList<>(List.of(
                 "http://localhost:4200",
-                "http://localhost:4201"
+                "http://localhost:4201",
+                "https://*.vercel.app"
         ));
         String extraOrigins = System.getenv("ALLOWED_ORIGINS");
         if (extraOrigins != null && !extraOrigins.isBlank()) {
-            origins.addAll(Arrays.asList(extraOrigins.split(",")));
+            patterns.addAll(Arrays.asList(extraOrigins.split(",")));
         }
-        config.setAllowedOrigins(origins);
+        config.setAllowedOriginPatterns(patterns);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
